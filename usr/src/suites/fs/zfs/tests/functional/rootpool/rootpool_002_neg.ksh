@@ -24,6 +24,9 @@
 # Copyright 2009 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
+
+#
+# Copyright (c) 2013 by Delphix. All rights reserved.
 #
 
 . $STF_SUITE/include/libtest.kshlib
@@ -43,12 +46,23 @@
 verify_runnable "global"
 log_assert "zpool/zfs destory <rootpool> should return error"
 
-
 typeset rootpool=$(get_rootpool)
+typeset tmpfile="/tmp/mounted-datasets.$$"
+
+# Collect the currently mounted ZFS filesystems, so that we can repair any
+# damage done by the attempted pool destroy. The destroy itself should fail, but
+# some filesystems can become unmounted in the process, and aren't automatically
+# remounted.
+$MOUNT -p | $AWK '{if ($4 == "zfs") print $1" "$3}' > $tmpfile
 
 log_mustnot $ZPOOL destroy $rootpool
+
+# Remount any filesystems that the destroy attempt unmounted.
+while read ds mntpt; do
+	mounted $ds || log_must $MOUNT -Fzfs $ds $mntpt
+done < $tmpfile
+$RM -f $tmpfile
 
 log_mustnot $ZFS destroy $rootpool
 
 log_pass "rootpool can not be destroyed"
-

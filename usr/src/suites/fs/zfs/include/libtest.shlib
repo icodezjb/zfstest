@@ -365,7 +365,9 @@ function default_cleanup_noexit
 	# filesystems it contains.
 	#
 	if is_global_zone; then
+		export __ZFS_POOL_RESTRICT="$TESTPOOL"
 		$ZFS unmount -a > /dev/null 2>&1
+		unset __ZFS_POOL_RESTRICT
 		exclude=`eval $ECHO \"'(${KEEP})'\"`
 		ALL_POOLS=$($ZPOOL list -H -o name \
 		    | $GREP -v "$NO_POOLS" | $EGREP -v "$exclude")
@@ -1021,12 +1023,12 @@ function is_global_zone
 }
 
 #
-# Verify whether test is permit to run from
+# Verify whether test is permitted to run from
 # global zone, local zone, or both
 #
 # $1 zone limit, could be "global", "local", or "both"(no limit)
 #
-# Return 0 if permit, otherwise exit with log_unsupported
+# Return 0 if permitted, otherwise exit with log_unsupported
 #
 function verify_runnable # zone limit
 {
@@ -1038,22 +1040,22 @@ function verify_runnable # zone limit
 		case $limit in
 			global|both)
 				;;
-			local)  log_unsupported "Test is unable to run from \
-					global zone."
+			local)	log_unsupported "Test is unable to run from " \
+					"global zone."
 				;;
-			*)      log_note "Warning: unknown limit $limit - " \
-				    "use both."
+			*)	log_note "Warning: unknown limit $limit - " \
+					"use both."
 				;;
 		esac
 	else
 		case $limit in
 			local|both)
 				;;
-			global) log_unsupported "Test is unable to run from \
-					local zone."
+			global)	log_unsupported "Test is unable to run from " \
+					"local zone."
 				;;
-			*)      log_note "Warning: unknown limit $limit - " \
-				    "use both."
+			*)	log_note "Warning: unknown limit $limit - " \
+					"use both."
 				;;
 		esac
 
@@ -2617,4 +2619,17 @@ function ds_is_snapshot
 	typeset type=$(get_prop type $1)
 	[[ $type = "snapshot" ]] && return 0
 	return 1
+}
+
+#
+# Check if Trusted Extensions are installed and enabled
+#
+function is_te_enabled
+{
+	$SVCS -H -o state labeld 2>/dev/null | $GREP "enabled"
+	if (($? != 0)); then
+		return 1
+	else
+		return 0
+	fi
 }

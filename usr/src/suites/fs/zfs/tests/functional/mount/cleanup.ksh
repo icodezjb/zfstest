@@ -25,22 +25,14 @@
 # Use is subject to license terms.
 #
 
+#
+# Copyright (c) 2013 by Delphix. All rights reserved.
+#
+
 . $STF_SUITE/include/libtest.kshlib
 
-status=0
-for fs in $TESTFSS ; do
-	mounted $fs 
-	if [ $? == 0 ] ; then
-		log_pos $ZFS unmount $fs || status=1
-	fi  
-	log_pos $ZFS destroy $fs || status=1
+log_must destroy_pool $TESTPOOL
+
+for dir in $TESTDIRS; do
+	$RM -rf $dir
 done
-
-for dir in $TESTDIRS ; do
-	log_pos $RM -rf $dir || status=1
-done
-
-destroy_pool $TESTPOOL || status=1
-
-(( $status != 0 )) && log_unresolved || log_pass
-

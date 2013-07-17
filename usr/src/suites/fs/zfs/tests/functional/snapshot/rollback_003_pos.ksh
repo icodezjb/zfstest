@@ -24,6 +24,11 @@
 # Copyright 2009 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
+
+#
+# Copyright (c) 2013 by Delphix. All rights reserved.
+#
+
 . $STF_SUITE/include/libtest.kshlib
 . $STF_SUITE/tests/functional/cli_root/zfs_rollback/zfs_rollback_common.kshlib
 
@@ -47,7 +52,9 @@ function cleanup
 	typeset snap=""
 	typeset fs=""
 
+	export __ZFS_POOL_RESTRICT="$TESTPOOL"
 	log_must $ZFS mount -a
+	unset __ZFS_POOL_RESTRICT
 
 	for snap in "$SNAPPOOL.1" "$SNAPPOOL"
 	do
@@ -55,7 +62,7 @@ function cleanup
 		[[ $? -eq 0 ]] && \
 			log_must $ZFS destroy $snap
 	done
-	
+
 	for fs in "$TESTPOOL/$TESTFILE/$TESTFILE.1" "$TESTPOOL/$TESTFILE"
 	do
 		datasetexists $fs
@@ -86,8 +93,10 @@ log_note "Verify rollback of multiple nested file systems succeeds."
 log_must $ZFS snapshot $TESTPOOL/$TESTFILE@$TESTSNAP
 log_must $ZFS snapshot $SNAPPOOL.1
 
-$ZFS unmount -a > /dev/null 2>&1
+export __ZFS_POOL_RESTRICT="$TESTPOOL"
+log_must $ZFS unmount -a
 log_must $ZFS mount -a
+unset __ZFS_POOL_RESTRICT
 
 log_must $TOUCH /$TESTPOOL/$TESTFILE/$TESTFILE.1
 

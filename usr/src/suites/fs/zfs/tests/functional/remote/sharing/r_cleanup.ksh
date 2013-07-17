@@ -24,6 +24,11 @@
 # Copyright 2009 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
+
+#
+# Copyright (c) 2013 by Delphix. All rights reserved.
+#
+
 RTEST_ROOT=$1
 prog=`whence -p $0`
 progpath=${prog%/*}
@@ -40,7 +45,9 @@ $ZFS unshare -a
 ret=$?
 (( $ret != 0 )) && _err_exit $ret \
 	"Unsharing all zfs filesystems failed."
-$ZFS unmount -a > /dev/null 2>&1
+export __ZFS_POOL_RESTRICT="$TESTPOOL"
+log_must $ZFS unmount -a
+unset __ZFS_POOL_RESTRICT
 
 $ZPOOL list -H $RTESTPOOL >/dev/null 2>&1
 if (( $? == 0 )); then

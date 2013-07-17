@@ -25,6 +25,10 @@
 # Use is subject to license terms.
 #
 
+#
+# Copyright (c) 2013 by Delphix. All rights reserved.
+#
+
 . $STF_SUITE/include/libtest.kshlib
 . $STF_SUITE/tests/functional/cli_root/zfs_set/zfs_set_common.kshlib
 
@@ -54,7 +58,7 @@ else
 		"$TESTPOOL/$TESTFS@$TESTSNAP" "$TESTPOOL/$TESTVOL@$TESTSNAP"
 fi
 
- 
+
 set -A values "on" "off"
 
 function cleanup
@@ -71,8 +75,10 @@ function cleanup
 	[[ -n $old_fs_canmount ]] && \
 		log_must $ZFS set canmount=$old_fs_canmount $TESTPOOL/$TESTFS
 
-	$ZFS unmount -a > /dev/null 2>&1
+	export __ZFS_POOL_RESTRICT="$TESTPOOL"
+	log_must $ZFS unmount -a
 	log_must $ZFS mount -a
+	unset __ZFS_POOL_RESTRICT
 }
 
 log_assert "Setting a valid property of canmount to file system, it must be successful."
@@ -91,7 +97,7 @@ log_must $ZFS snapshot $TESTPOOL/$TESTFS@$TESTSNAP
 log_must $ZFS snapshot $TESTPOOL/$TESTVOL@$TESTSNAP
 log_must $ZFS clone $TESTPOOL/$TESTFS@$TESTSNAP $TESTPOOL/$TESTCLONE
 log_must $ZFS clone $TESTPOOL/$TESTVOL@$TESTSNAP $TESTPOOL/$TESTCLONE1
- 
+
 for dataset in "${dataset_pos[@]}" ; do
 	for value in "${values[@]}" ; do
 		set_n_check_prop "$value" "canmount" "$dataset"
@@ -104,7 +110,7 @@ for dataset in "${dataset_pos[@]}" ; do
 				log_must $ZFS mount $dataset
 			fi
 			log_must ismounted $dataset
-		fi	 
+		fi
 	done
 done
 

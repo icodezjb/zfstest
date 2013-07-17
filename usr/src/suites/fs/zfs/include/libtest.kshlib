@@ -365,7 +365,9 @@ function default_cleanup_noexit
 	# filesystems it contains.
 	#
 	if is_global_zone; then
+		export __ZFS_POOL_RESTRICT="$TESTPOOL"
 		$ZFS unmount -a > /dev/null 2>&1
+		unset __ZFS_POOL_RESTRICT
 		exclude=`eval $ECHO \"'(${KEEP})'\"`
 		ALL_POOLS=$($ZPOOL list -H -o name \
 		    | $GREP -v "$NO_POOLS" | $EGREP -v "$exclude")
@@ -1039,7 +1041,7 @@ function verify_runnable # zone limit
 			global|both)
 				break
 				;;
-			local)	log_unsupported "Test is unable to run from "\
+			local)	log_unsupported "Test is unable to run from " \
 					"global zone."
 				break
 				;;
@@ -1052,7 +1054,7 @@ function verify_runnable # zone limit
 			local|both)
 				break
 				;;
-			global)	log_unsupported "Test is unable to run from "\
+			global)	log_unsupported "Test is unable to run from " \
 					"local zone."
 				break
 				;;

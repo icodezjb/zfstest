@@ -25,6 +25,10 @@
 # Use is subject to license terms.
 #
 
+#
+# Copyright (c) 2013 by Delphix. All rights reserved.
+#
+
 . $STF_SUITE/tests/functional/cli_root/zfs_mount/zfs_mount.kshlib
 . $STF_SUITE/tests/functional/cli_root/zfs_unmount/zfs_unmount.kshlib
 
@@ -168,7 +172,6 @@ typeset opt
 for opt in "-a" "-fa"; do
 	export __ZFS_POOL_RESTRICT="$TESTPOOL"
 	log_must $ZFS $mountall
-	unset __ZFS_POOL_RESTRICT
 
 	if [[ $opt == "-fa" ]]; then
 		mntpnt=$(get_prop mountpoint ${TESTPOOL}/${TESTCTR}/${TESTFS})
@@ -176,7 +179,6 @@ for opt in "-a" "-fa"; do
 		log_mustnot $ZFS unmount -a
 	fi
 
-	export __ZFS_POOL_RESTRICT="$TESTPOOL"
 	log_must $ZFS unmount $opt
 	unset __ZFS_POOL_RESTRICT
 

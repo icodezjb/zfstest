@@ -25,6 +25,10 @@
 # Use is subject to license terms.
 #
 
+#
+# Copyright (c) 2013 by Delphix. All rights reserved.
+#
+
 . $STF_SUITE/include/libtest.kshlib
 . $STF_SUITE/tests/functional/cli_root/zfs_set/zfs_set_common.kshlib
 
@@ -43,12 +47,6 @@
 
 verify_runnable "both"
 
-# check if the testing box support noauto option or not.
-$ZFS get 2>&1 | $GREP -w canmount | $GREP -w noauto >/dev/null 2>&1
-if (( $? != 0 )); then
-	log_unsupported "canmount=noauto is not supported."
-fi
-
 set -A dataset_pos \
 	"$TESTPOOL/$TESTFS" "$TESTPOOL/$TESTCTR" "$TESTPOOL/$TESTCLONE"
 
@@ -60,7 +58,7 @@ else
 	set -A dataset_neg \
 		"$TESTPOOL/$TESTFS@$TESTSNAP" "$TESTPOOL/$TESTVOL@$TESTSNAP"
 fi
- 
+
 function cleanup
 {
 	i=0
@@ -81,7 +79,7 @@ function cleanup
 			$RM -fr $mntp
 		fi
 	fi
-	
+
 	if snapexists $TESTPOOL/$TESTFS@$TESTSNAP ; then
 		log_must $ZFS destroy -R $TESTPOOL/$TESTFS@$TESTSNAP
 	fi
@@ -89,9 +87,12 @@ function cleanup
 		log_must $ZFS destroy -R $TESTPOOL/$TESTVOL@$TESTSNAP
 	fi
 
-	$ZFS unmount -a > /dev/null 2>&1
+
+	export __ZFS_POOL_RESTRICT="$TESTPOOL"
+	log_must $ZFS unmount -a
 	log_must $ZFS mount -a
-	
+	unset __ZFS_POOL_RESTRICT
+
 	if [[ -d $tmpmnt ]]; then
 		$RM -fr $tmpmnt
 	fi
@@ -118,11 +119,12 @@ while (( i < ${#dataset_pos[*]} )); do
 	(( i = i + 1 ))
 done
 
-i=0 
+i=0
 while (( i < ${#dataset_pos[*]} )) ; do
 	dataset=${dataset_pos[i]}
 	set_n_check_prop "noauto" "canmount" "$dataset"
 	log_must $ZFS set mountpoint=$tmpmnt $dataset
+	export __ZFS_POOL_RESTRICT="$TESTPOOL"
 	if  ismounted $dataset; then
 		$ZFS unmount -a > /dev/null 2>&1
 		log_must mounted $dataset
@@ -136,6 +138,7 @@ while (( i < ${#dataset_pos[*]} )) ; do
 		$ZFS unmount -a > /dev/null 2>&1
 		log_must unmounted $dataset
 	fi
+	unset __ZFS_POOL_RESTRICT
 
 	log_must $ZFS mount $dataset
 	log_must mounted $dataset

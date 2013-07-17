@@ -24,7 +24,7 @@
 # Use is subject to license terms.
 
 #
-# Copyright (c) 2012 by Delphix. All rights reserved.
+# Copyright (c) 2013 by Delphix. All rights reserved.
 #
 
 # All the commands in this file are converted into environment variables
@@ -157,6 +157,7 @@
 /usr/sbin/ufsrestore
 /usr/bin/umask
 /usr/sbin/umount
+/usr/sbin/umountall
 /usr/bin/uname
 /usr/bin/uniq
 /usr/sbin/unshare
@@ -172,6 +173,8 @@
 /usr/bin/zonename
 /usr/bin/bc
 /usr/bin/python
+/usr/bin/xargs
+
 # ZFS Commands
 /usr/sbin/zdb
 /usr/sbin/zhack

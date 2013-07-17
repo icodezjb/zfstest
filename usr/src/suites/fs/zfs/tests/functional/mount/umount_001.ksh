@@ -21,34 +21,33 @@
 #
 
 #
-# Copyright 2008 Sun Microsystems, Inc.  All rights reserved.
+# Copyright 2007 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
+
+#
+# Copyright (c) 2013 by Delphix. All rights reserved.
 #
 
 . $STF_SUITE/include/libtest.kshlib
 
 #
 # DESCRIPTION:
-# 
-# rootpool's bootfs property must be equal to <rootfs>
+# zfs mount and unmount commands should mount and unmount existing
+# file systems.
 #
 # STRATEGY:
-# 1) check if the system is zfsroot or not.
-# 2) get the rootpool and rootfs if it's zfs root
-# 3) check the rootpool's bootfs value
-# 4) chek if the boofs equal to rootfs
+# 1. Call zfs mount command
+# 2. Make sure the file systems were mounted
+# 3. Call zfs unmount command
+# 4. Make sure the file systems were unmounted
 #
-verify_runnable "global"
-log_assert "rootpool's bootfs property must be equal to <rootfs>"
 
-typeset rootfs=$(get_rootfs)
-typeset rootpool=$(get_rootpool)
-typeset bootfs=$(get_pool_prop bootfs $rootpool)
+for fs in $TESTFSS ; do
+	log_must $ZFS mount $fs
+	log_must mounted $fs
+	log_must $ZFS umount $fs
+	log_must unmounted $fs
+done
 
-if  [[ $bootfs != $rootfs ]]; then
-	log_failed "rootfs is not same as bootfs."
-fi
-
-log_pass "rootpool's bootfs property equal to rootfs."
-
+log_pass "All file systems are unmounted"

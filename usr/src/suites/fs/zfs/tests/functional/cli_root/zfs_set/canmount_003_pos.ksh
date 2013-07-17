@@ -25,12 +25,16 @@
 # Use is subject to license terms.
 #
 
+#
+# Copyright (c) 2013 by Delphix. All rights reserved.
+#
+
 . $STF_SUITE/include/libtest.kshlib
 . $STF_SUITE/tests/functional/cli_root/zfs_set/zfs_set_common.kshlib
 
 #
 # DESCRIPTION:
-# While canmount=noauto and  the dataset is mounted, 
+# While canmount=noauto and  the dataset is mounted,
 # zfs must not attempt to unmount it.
 #
 # STRATEGY:
@@ -40,12 +44,6 @@
 #
 
 verify_runnable "both"
-
-# check if the testing box support noauto option or not.
-$ZFS get 2>&1 | $GREP -w canmount | $GREP -w noauto >/dev/null 2>&1
-if (( $? != 0 )); then
-	log_unsupported "canmount=noauto is not supported."
-fi
 
 set -A dataset_pos "$TESTPOOL/$TESTFS" "$TESTPOOL/$TESTCLONE"
 
@@ -70,13 +68,15 @@ function cleanup
 			log_must $RM -fr $mntp
 		fi
 	fi
-	
+
 	if snapexists $TESTPOOL/$TESTFS@$TESTSNAP ; then
 		log_must $ZFS destroy -R $TESTPOOL/$TESTFS@$TESTSNAP
 	fi
 
-	$ZFS unmount -a > /dev/null 2>&1
+	export __ZFS_POOL_RESTRICT="$TESTPOOL"
+	log_must $ZFS unmount -a
 	log_must $ZFS mount -a
+	unset __ZFS_POOL_RESTRICT
 }
 
 log_assert "While canmount=noauto and  the dataset is mounted,"\
@@ -99,7 +99,7 @@ while (( i < ${#dataset_pos[*]} )); do
 	(( i = i + 1 ))
 done
 
-i=0 
+i=0
 while (( i < ${#dataset_pos[*]} )) ; do
 	dataset=${dataset_pos[i]}
 	if  ismounted $dataset; then

@@ -24,16 +24,25 @@
 # Use is subject to license terms.
 #
 
-STF_ENVFILES=vars.cfg
+#
+# Copyright (c) 2013 by Delphix. All rights reserved.
+#
+
+STF_ROOT_CONFIGURE=
+STF_USER_CONFIGURE=
 
 STF_ROOT_SETUP=setup
+STF_USER_SETUP=
 
 STF_ROOT_CLEANUP=cleanup
+STF_USER_CLEANUP=
 
-STF_TESTCASES_GEN=mkassert
+STF_ROOT_TESTCASES=umount_001 umountall_001
+STF_USER_TESTCASES=
 
-STF_EXECUTABLES=mounttest
+STF_ENVFILES=
+STF_INCLUDES=
 
 STF_DONTBUILDMODES=true
- 
-include ${STF_TOOLS}/Makefiles/Makefile.master
+
+include $(STF_TOOLS)/Makefiles/Makefile.master

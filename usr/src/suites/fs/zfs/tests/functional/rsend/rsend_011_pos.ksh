@@ -25,6 +25,10 @@
 # Use is subject to license terms.
 #
 
+#
+# Copyright (c) 2013 by Delphix. All rights reserved.
+#
+
 . $STF_SUITE/tests/functional/rsend/rsend.kshlib
 
 #
@@ -41,7 +45,9 @@ verify_runnable "both"
 
 function cleanup
 {
-	$ZFS unmount -a > /dev/null 2>&1
+	export __ZFS_POOL_RESTRICT="$POOL $POOL2"
+	log_must $ZFS unmount -a
+	unset __ZFS_POOL_RESTRICT
 	log_must cleanup_pool $POOL
 	log_must cleanup_pool $POOL2
 

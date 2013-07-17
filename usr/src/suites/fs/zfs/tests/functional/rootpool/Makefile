@@ -33,9 +33,7 @@ STF_USER_SETUP=
 STF_ROOT_CLEANUP=cleanup
 STF_USER_CLEANUP=
 
-STF_ROOT_TESTCASES=rootpool_001_pos rootpool_002_neg rootpool_003_neg \
-		   rootpool_004_pos rootpool_005_pos rootpool_006_pos \
-		   rootpool_007_neg
+STF_ROOT_TESTCASES=rootpool_002_neg rootpool_003_neg rootpool_007_neg
 
 STF_USER_TESTCASES=
 

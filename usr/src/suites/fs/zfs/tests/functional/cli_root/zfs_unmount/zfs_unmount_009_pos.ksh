@@ -25,6 +25,10 @@
 # Use is subject to license terms.
 #
 
+#
+# Copyright (c) 2013 by Delphix. All rights reserved.
+#
+
 . $STF_SUITE/include/libtest.kshlib
 
 #
@@ -72,14 +76,14 @@ function restore_dataset
 		log_must $ZFS create $TESTPOOL/$TESTFS
 		log_must $ZFS set mountpoint=$TESTDIR $TESTPOOL/$TESTFS
 		log_must cd $TESTDIR
-		$ECHO hello > world 
+		$ECHO hello > world
 		log_must $ZFS snapshot $TESTPOOL/$TESTFS@$TESTSNAP
 		log_must cd .zfs/snapshot/$TESTSNAP
 	fi
 }
 
 
-log_assert "zfs fource unmount and destroy in snapshot directory will not cause error."
+log_assert "zfs force unmount and destroy in snapshot directory will not cause error."
 log_onexit cleanup
 
 for fs in $TESTPOOL/$TESTFS $TESTPOOL ; do
@@ -87,16 +91,18 @@ for fs in $TESTPOOL/$TESTFS $TESTPOOL ; do
 	typeset mtpt=$(get_prop mountpoint $fs)
 
 	log_must cd $mtpt
-	$ECHO hello > world 
+	$ECHO hello > world
 	log_must $ZFS snapshot $snap
 	log_must cd .zfs/snapshot/$TESTSNAP
 
+	export __ZFS_POOL_RESTRICT="$TESTPOOL"
 	log_mustnot $ZFS unmount -a
 	log_must $ZFS unmount -fa
 	log_mustnot $LS
 	log_must cd /
 
 	log_must $ZFS mount -a
+	unset __ZFS_POOL_RESTRICT
 	log_must cd $mtpt
 	log_must cd .zfs/snapshot/$TESTSNAP
 
@@ -120,4 +126,4 @@ log_must eval $ZPOOL list > /dev/null 2>&1
 log_must eval $ZPOOL status > /dev/null 2>&1
 $ZPOOL iostat > /dev/null 2>&1
 
-log_pass "zfs fource unmount and destroy in snapshot directory will not cause error."
+log_pass "zfs force unmount and destroy in snapshot directory will not cause error."

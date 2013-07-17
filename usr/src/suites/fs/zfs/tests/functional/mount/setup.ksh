@@ -25,53 +25,26 @@
 # Use is subject to license terms.
 #
 
+#
+# Copyright (c) 2013 by Delphix. All rights reserved.
+#
+
 . $STF_SUITE/include/libtest.kshlib
 
-function writesetup #filename
-{
-	cat >> $1 <<-EOF
-	export TESTFSS="$TESTFSS"
-	export TESTDIRS="$TESTDIRS"
-	EOF
-
-	(( $? != 0 )) && log_fail Could not write to setup file, $1	
-}
-
-log_onexit writesetup $1
-
 DISK=${DISKS%% *}
+create_pool $TESTPOOL "$DISK"
 
-create_pool $TESTPOOL "$DISK" 
-
-log_note Create file systems with mountpoints, so they are mounted automatically
-i=1
-TESTFSS=""
-TESTDIRS=""
-while [ $i -le $FS_CNT ] ; do
+for i in 1 2 3; do
 	dir=$TESTDIR.$i
 	fs=$TESTPOOL/$TESTFS.$i
 
-	log_pos $RM -rf $dir || log_unresolved Could not remove $dir
-
-	log_pos $MKDIR -p $dir || log_unresolved Could not create $dir
-
-	TESTDIRS="$TESTDIRS $dir"
-	
 	log_must $ZFS create $fs
+	log_must $MKDIR -p $dir
 	log_must $ZFS set mountpoint=$dir $fs
 
-	TESTFSS="$TESTFSS $fs"
-
-	log_note Make sure file system $fs was mounted 
-	mounted $fs || log_fail File system $fs is not mounted
-
-	log_note Unmount the file system 
+	log_must mounted $fs
 	log_must $ZFS unmount $fs
-
-	log_note Make sure file system $fs is unmounted
-	unmounted $fs || log_fail File system $fs is not unmounted	
-
-	(( i = i + 1 )) 	 
+	log_must unmounted $fs
 done
-	
+
 log_pass
