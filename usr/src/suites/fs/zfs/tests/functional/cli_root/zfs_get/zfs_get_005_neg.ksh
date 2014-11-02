@@ -40,7 +40,7 @@
 
 verify_runnable "both"
 
-typeset val_opts=(p r H ）
+typeset val_opts=(p r H）
 typeset v_props=(type used available creation volsize referenced compressratio \
     mounted origin recordsize quota reservation mountpoint sharenfs checksum \
     compression atime devices exec readonly setuid zoned snapdir aclmode \
